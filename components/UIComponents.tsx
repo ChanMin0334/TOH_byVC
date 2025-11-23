@@ -98,7 +98,7 @@ export const Container: React.FC<{ children: ReactNode; className?: string }> = 
 export const BottomNav: React.FC<{ current: string; onChange: (page: string) => void }> = ({ current, onChange }) => {
   const navItems = [
     { id: 'home', icon: Home, label: '홈' },
-    { id: 'create', icon: Plus, label: '생성' }, // Using Plus as Create icon shorthand
+    // '생성' 메뉴 제거됨
     { id: 'ranking', icon: Trophy, label: '랭킹' },
   ];
 

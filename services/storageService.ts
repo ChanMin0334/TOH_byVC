@@ -1,4 +1,5 @@
 import { Character, User, BattleResult } from '../types';
+import { generateId } from '../utils/id';
 
 const KEYS = {
   USERS: 'toh_users',
@@ -14,7 +15,7 @@ export const registerUser = (username: string): User => {
   if (existing) return existing;
 
   const newUser: User = {
-    id: crypto.randomUUID(),
+    id: generateId(),
     username,
     createdAt: Date.now()
   };
@@ -72,6 +73,11 @@ export const getRandomOpponent = (myCharId: string): Character | null => {
   if (candidates.length === 0) return null;
   const randomIndex = Math.floor(Math.random() * candidates.length);
   return candidates[randomIndex];
+};
+
+export const deleteCharacter = (charId: string) => {
+  const remaining = getAllCharacters().filter(c => c.id !== charId);
+  localStorage.setItem(KEYS.CHARACTERS, JSON.stringify(remaining));
 };
 
 // Battle Management

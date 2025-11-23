@@ -1,6 +1,7 @@
 import { Character, BattleResult, BattleLog, AIBattleResponse } from '../types';
 import * as Storage from './storageService';
 import * as AIService from './aiService';
+import { generateId } from '../utils/id';
 
 const K_FACTOR = 32; // Standard K-factor for Elo
 
@@ -58,7 +59,7 @@ export const processBattle = async (charAId: string, charBId: string, isSimulati
 
   // 5. Create Record
   const result: BattleResult = {
-    id: crypto.randomUUID(),
+    id: generateId(),
     charAId: charA.id,
     charBId: charB.id,
     charAName: charA.name,

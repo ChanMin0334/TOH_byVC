@@ -4,6 +4,7 @@ import { User, Character, WorldType, BattleResult } from './types';
 import * as Storage from './services/storageService';
 import * as GameService from './services/gameService';
 import * as AIService from './services/aiService';
+import { generateId } from './utils/id';
 import { Button, Card, Input, TextArea, Container, BottomNav, Badge, Tabs, Avatar, ProgressBar } from './components/UIComponents';
 import { Swords, Trophy, Skull, Zap, ChevronLeft, Plus, Crown, Clock } from 'lucide-react';
 
@@ -88,7 +89,7 @@ const CreatePage: React.FC<{ user: User; onFinish: () => void }> = ({ user, onFi
     if (generatedChar) {
       const newChar: Character = {
         ...generatedChar,
-        id: crypto.randomUUID(),
+        id: generateId(),
         createdAt: Date.now()
       } as Character;
       Storage.saveCharacter(newChar);
@@ -338,8 +339,14 @@ const BattleView: React.FC<{ myChar: Character; onClose: () => void }> = ({ myCh
 };
 
 // 4. Detailed Character View
-const CharacterDetail: React.FC<{ char: Character; onBack: () => void; onBattle: () => void }> = ({ char, onBack, onBattle }) => {
+const CharacterDetail: React.FC<{ char: Character; onBack: () => void; onBattle: () => void; onDelete: () => void }> = ({ char, onBack, onBattle, onDelete }) => {
   const [tab, setTab] = useState('소개');
+
+  const handleDelete = () => {
+    if (window.confirm(`${char.name} 캐릭터를 삭제할까요? 이 작업은 되돌릴 수 없습니다.`)) {
+      onDelete();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0f172a] pb-20">
@@ -347,9 +354,14 @@ const CharacterDetail: React.FC<{ char: Character; onBack: () => void; onBattle:
       <div className="relative h-[35vh]">
         <img src={char.avatarUrl} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent"></div>
-        <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-10">
+        <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-10 gap-2">
           <button onClick={onBack} className="p-2 rounded-full bg-black/30 backdrop-blur text-white"><ChevronLeft /></button>
-          <button className="p-2 rounded-full bg-black/30 backdrop-blur text-white"><Crown size={20} /></button>
+          <div className="flex gap-2">
+            <button onClick={handleDelete} className="p-2 rounded-full bg-black/40 backdrop-blur text-red-300 border border-red-500/40" title="캐릭터 삭제">
+              <Skull size={20} />
+            </button>
+            <button className="p-2 rounded-full bg-black/30 backdrop-blur text-white"><Crown size={20} /></button>
+          </div>
         </div>
         <div className="absolute bottom-0 left-0 w-full p-6">
           <Badge color="bg-indigo-600" className="mb-2">{char.world}</Badge>
@@ -573,18 +585,17 @@ const App: React.FC = () => {
   const [selectedChar, setSelectedChar] = useState<Character | null>(null);
   const [isBattling, setIsBattling] = useState(false);
 
+  const handleDeleteCharacter = (charId: string) => {
+    Storage.deleteCharacter(charId);
+    setSelectedChar(null);
+    setView('home');
+  }; 
+
   useEffect(() => {
     Storage.seedDatabase(); 
     const loadedUser = Storage.getCurrentUser();
     if (loadedUser) setUser(loadedUser);
   }, []);
-
-  // [Test Hook] Trigger AI Test on Login
-  useEffect(() => {
-    if (user) {
-      AIService.testConnection();
-    }
-  }, [user]);
 
   if (!user) {
     return <LoginPage onLogin={() => setUser(Storage.getCurrentUser())} />;
@@ -609,6 +620,7 @@ const App: React.FC = () => {
         char={selectedChar} 
         onBack={() => setSelectedChar(null)} 
         onBattle={() => setIsBattling(true)}
+        onDelete={() => handleDeleteCharacter(selectedChar.id)}
       />
     );
   }

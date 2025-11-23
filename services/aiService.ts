@@ -6,12 +6,10 @@ import { AICharacterResponse, AIBattleResponse, Character, WorldType } from '../
  * - Requests are sent directly from the browser; to avoid leaking secrets in production,
  *   proxy the call through your own backend instead.
  */
-const API_URL = 'https://guest-api.sktax.chat/v1/chat/completions';
+const API_URL = '/api/chat';
 const API_MODEL = 'ax4';
-// NOTE: 사용자 요청으로 API 키를 하드코딩합니다.
-const API_KEY = 'sktax-XyeKFrq67ZjS4EpsDlrHHXV8it';
 
-// 하드코딩된 키가 항상 존재하므로 mock 모드는 기본적으로 비활성화됩니다.
+// Proxy를 사용하므로 항상 실시간 호출을 사용한다.
 const USE_MOCK_AI = false;
 
 type ChatMessage = {
@@ -23,8 +21,7 @@ const callAdotxChat = async (messages: ChatMessage[]): Promise<string> => {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${API_KEY}`
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       model: API_MODEL,
@@ -128,17 +125,15 @@ export const simulateBattleAI = async (charA: Character, charB: Character): Prom
 const mockCharacterGeneration = async (world: WorldType, name: string, prompt: string): Promise<AICharacterResponse> => {
   await new Promise(resolve => setTimeout(resolve, 2000)); // Fake loading
 
-  const adjectives = ["전설의", "어둠의", "빛나는", "방랑하는", "미친", "고독한"];
-  const refinedName = name.trim() || `${adjectives[Math.floor(Math.random()*adjectives.length)]} 모험가`;
+  const refinedName = name.trim() || '목업입니다.';
+  const placeholder = '목업입니다.';
 
   return {
     name: refinedName,
-    bio: `[${world}] 세계관에서 ${prompt}의 운명을 타고난 존재입니다. 과거의 기억을 잃었지만 본능적으로 싸우는 법을 알고 있습니다.`,
-    personality: "냉소적이지만 결정적인 순간에 뜨거워지는 성격.",
+    bio: placeholder,
+    personality: placeholder,
     skills: [
-      { name: "운명의 일격", description: "결정적인 순간에 적의 급소를 가격합니다.", tags: ["공격", "치명타"] },
-      { name: "생존 본능", description: "체력이 낮아지면 회피율이 급격히 상승합니다.", tags: ["패시브", "생존"] },
-      { name: world === WorldType.FANTASY ? "마나 폭발" : "전술 해킹", description: "주변의 에너지를 과부하시켜 적을 혼란에 빠뜨립니다.", tags: ["특수"] }
+      { name: placeholder, description: placeholder, tags: [placeholder] }
     ]
   };
 };
@@ -165,3 +160,20 @@ const mockBattleSimulation = async (charA: Character, charB: Character): Promise
     summary: `${winnerName}의 전략적 판단이 승리를 가져왔습니다.`
   };
 };
+
+export const testConnection = async () => {
+  if (USE_MOCK_AI) {
+    console.info('[AI TEST] Mock 모드에서는 테스트 호출이 생략됩니다.');
+    return;
+  }
+
+  try {
+    const content = await callAdotxChat([
+      { role: 'user', content: '여름철 에어컨 적정 온도는? 한줄로 대답해.' }
+    ]);
+    console.info('[AI TEST] 응답:', content);
+  } catch (error) {
+    console.error('[AI TEST] 호출 실패:', error);
+  }
+};
+

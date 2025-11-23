@@ -54,20 +54,52 @@ export const generateCharacterAI = async (world: WorldType, name: string, userPr
   if (USE_MOCK_AI) {
     return mockCharacterGeneration(world, name, userPrompt);
   }
-  const systemPrompt = '당신은 텍스트 PvP 게임의 캐릭터 디자이너입니다. 반드시 JSON만 출력하세요.';
-  const userContent = `세계관: ${world}
-선호 이름: ${name || '없음'}
-유저 설정: ${userPrompt}
+  const systemPrompt = `당신은 웹 기반 텍스트 PvP 게임 "Tale of Heroes"의 전속 게임 디자이너 AI입니다.
+플레이어가 제공한 긴 한국어 설명을 분석해 캐릭터 설정과 스킬을 설계하십시오.
+게임에는 수치 스탯이 없으며 모든 표현은 서술형이어야 합니다.
+전투는 턴제가 아니므로 "턴" 기반 표현을 사용하지 마십시오.
+출력은 반드시 아래 JSON 스키마와 동일한 구조 하나만 포함해야 하며, JSON 밖의 텍스트는 절대 추가하지 마십시오.
 
-다음 스키마를 정확히 지키는 JSON을 생성하세요:
 {
-  "name": string,
-  "bio": string,
-  "personality": string,
+  "name": "",
+  "title": "",
+  "background": "",
+  "personality": "",
+  "combatStyle": "",
+  "role": "",
+  "strengths": [""],
+  "weaknesses": [""],
   "skills": [
-    {"name": string, "description": string, "tags": string[]}
+    {
+      "name": "",
+      "type": "",
+      "description": "",
+      "mechanics": "",
+      "impact": "",
+      "frequency": "",
+      "risk": "",
+      "tags": [""],
+      "drawbacks": "",
+      "synergyNote": ""
+    }
   ]
 }`;
+
+  const userContent = `세계관: ${world}
+선호 이름: ${name || '없음'}
+플레이어 입력: ${userPrompt}
+
+설계 규칙:
+1. 캐릭터 기본 정보에 name/title/background/personality/combatStyle/role/strengths(2~4개)/weaknesses(2~4개)를 채워 넣는다.
+2. role은 "공격형" | "지원형" | "제어형" | "생존형" | "하이브리드" 중 하나 또는 둘 조합으로 표현한다.
+3. 스킬은 총 4개를 만들고 type은 "attack" | "support" | "control" | "mobility" | "special" 중에서 선택한다.
+4. mechanics는 전투 시스템이 이해할 수 있게 서술형으로 목적과 결과를 작성한다.
+5. impact는 "low" | "normal" | "high" | "ultimate" 중 하나, frequency는 "자주 사용 가능" | "조건부 사용" | "전투당 1회" 중 하나, risk는 "low" | "medium" | "high" 중 하나를 사용한다.
+6. impact가 "high" 이상이면 risk는 최소 "medium"이고 frequency 또는 drawbacks에 강한 제약을 둔다.
+7. "턴"이라는 표현을 쓰지 말고 "잠시", "일정 시간" 등의 서술형 시간을 사용한다.
+8. 스킬 간 상호작용과 시너지를 드러내고, 모든 스킬에는 명확한 drawbacks와 synergyNote를 작성한다.
+9. 숫자 스탯이나 공격력 수치를 절대 언급하지 말고, 서술형으로 강약을 표현하라.
+10. 출력은 위 JSON 형식 하나뿐이며, 추가 텍스트를 절대 포함하지 않는다.`;
 
   try {
     const content = await callAdotxChat([

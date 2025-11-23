@@ -82,20 +82,44 @@ export const Badge: React.FC<{ children: ReactNode; color?: string; className?: 
 
 // --- Input/Textarea ---
 export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => (
-  <input className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-500" {...props} />
+  <input className="w-full bg-[#050b18] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-500" {...props} />
 );
 
 export const TextArea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = (props) => (
-  <textarea className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-500 min-h-[120px]" {...props} />
+  <textarea className="w-full bg-[#050b18] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-500 min-h-[120px]" {...props} />
 );
 
 // --- Layout Container ---
-export const Container: React.FC<{ children: ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={`max-w-md mx-auto min-h-screen px-4 pb-24 pt-4 ${className || ''}`}>{children}</div>
-);
+interface ContainerProps {
+  children: ReactNode;
+  className?: string;
+  frameClassName?: string;
+  disableFrame?: boolean;
+  contentClassName?: string;
+}
+
+export const Container: React.FC<ContainerProps> = ({ children, className = '', frameClassName = '', disableFrame = false, contentClassName = 'p-6' }) => {
+  if (disableFrame) {
+    return (
+      <div className={`w-full max-w-[520px] mx-auto min-h-screen px-4 pb-28 pt-4 ${className}`}>
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-[520px] mx-auto px-4 pb-28 pt-0 min-h-screen">
+      <div className={`bg-[#050b18] rounded-none shadow-[0_24px_60px_rgba(2,6,23,0.75)] overflow-hidden border border-slate-900/30 ${frameClassName}`}>
+        <div className={`${contentClassName} ${className}`}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // --- Bottom Nav ---
-export const BottomNav: React.FC<{ current: string; onChange: (page: string) => void }> = ({ current, onChange }) => {
+export const BottomNav: React.FC<{ current: string; onChange: (page: string) => void; maxWidthClass?: string }> = ({ current, onChange, maxWidthClass = 'max-w-[520px]' }) => {
   const navItems = [
     { id: 'home', icon: Home, label: '홈' },
     // '생성' 메뉴 제거됨
@@ -103,29 +127,33 @@ export const BottomNav: React.FC<{ current: string; onChange: (page: string) => 
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-[#0f172a]/95 backdrop-blur-md border-t border-slate-800 px-6 py-2 pb-6 flex justify-around items-center z-40 max-w-md mx-auto left-0 right-0">
-      {navItems.map(item => {
-        const isActive = current === item.id;
-        return (
-          <button 
-            key={item.id}
-            onClick={() => onChange(item.id)}
-            className={`flex flex-col items-center gap-1 p-2 transition-colors ${isActive ? 'text-blue-500' : 'text-slate-500'}`}
-          >
-            <div className={`p-1 rounded-full ${isActive ? 'bg-blue-500/20' : ''}`}>
-              <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-            </div>
-            <span className="text-[10px] font-medium">{item.label}</span>
-          </button>
-        );
-      })}
+    <div className="fixed bottom-0 left-0 right-0 pt-3 z-40">
+      <div className={`w-full ${maxWidthClass} mx-auto`}>
+        <div className="bg-[#050b18] border border-slate-900/30 shadow-[0_-12px_40px_rgba(2,6,23,0.6)] flex justify-around items-center px-6 py-3">
+          {navItems.map(item => {
+            const isActive = current === item.id;
+            return (
+              <button 
+                key={item.id}
+                onClick={() => onChange(item.id)}
+                className={`flex flex-col items-center gap-1 p-2 transition-colors ${isActive ? 'text-blue-500' : 'text-slate-500'}`}
+              >
+                <div className={`p-1 rounded-full ${isActive ? 'bg-blue-500/20' : ''}`}>
+                  <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
 
 // --- Tabs ---
 export const Tabs: React.FC<{ options: string[]; active: string; onChange: (opt: string) => void }> = ({ options, active, onChange }) => (
-  <div className="flex bg-[#0f172a] p-1 rounded-xl mb-4">
+  <div className="flex bg-[#050b18] p-1 rounded-xl mb-4 border border-slate-700/60">
     {options.map(opt => (
       <button
         key={opt}

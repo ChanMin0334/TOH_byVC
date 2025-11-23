@@ -6,7 +6,7 @@ import * as GameService from './services/gameService';
 import * as AIService from './services/aiService';
 import { generateId } from './utils/id';
 import { Button, Card, Input, TextArea, Container, BottomNav, Badge, Tabs, Avatar, ProgressBar } from './components/UIComponents';
-import { Swords, Trophy, Skull, Zap, ChevronLeft, Plus, Crown, Clock } from 'lucide-react';
+import { Swords, Trophy, Skull, Zap, ChevronLeft, Plus, Crown, Clock, Share2 } from 'lucide-react';
 
 // --- SUB-PAGES ---
 
@@ -252,187 +252,352 @@ const BattleView: React.FC<{ myChar: Character; onClose: () => void }> = ({ myCh
   if (!opponent) return <div className="fixed inset-0 bg-[#0f172a] z-50"></div>;
 
   return (
-    <div className="fixed inset-0 bg-[#0f172a] z-50 flex flex-col overflow-hidden">
-      {/* Top Header */}
-      <div className="p-4 flex justify-between items-center bg-[#0f172a] z-10">
-        <button onClick={onClose} className="p-2 rounded-full bg-slate-800 text-white">
-          <ChevronLeft />
-        </button>
-        <span className="font-bold text-white">배틀 진행 중</span>
-        <div className="w-10"></div>
-      </div>
+    <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-[520px] max-h-[95vh] bg-[#0f172a] rounded-[32px] border border-slate-900/50 shadow-[0_30px_80px_rgba(2,6,23,0.85)] overflow-hidden flex flex-col">
+        {/* Top Header */}
+        <div className="p-4 flex justify-between items-center border-b border-slate-800">
+          <button onClick={onClose} className="p-2 rounded-full bg-slate-900 text-white border border-slate-700">
+            <ChevronLeft />
+          </button>
+          <span className="font-bold text-white tracking-wide">배틀 진행 중</span>
+          <div className="w-10"></div>
+        </div>
 
-      {/* VS Visual Area */}
-      <div className="relative flex-1 max-h-[40vh] min-h-[300px]">
-         {/* Split Background */}
-         <div className="absolute inset-0 flex">
-           <div className="w-1/2 h-full bg-indigo-900/20 relative overflow-hidden">
-             <img src={myChar.avatarUrl} className="absolute inset-0 w-full h-full object-cover opacity-60" />
-           </div>
-           <div className="w-1/2 h-full bg-red-900/20 relative overflow-hidden">
-             <img src={opponent.avatarUrl} className="absolute inset-0 w-full h-full object-cover opacity-60" />
-           </div>
-         </div>
-         
-         {/* Character Info Overlay */}
-         <div className="absolute inset-0 flex items-end justify-between p-4 pb-12 bg-gradient-to-t from-[#0f172a] to-transparent">
+        {/* VS Visual Area */}
+        <div className="relative flex-1 min-h-[260px] bg-[#0b1224]">
+          <div className="absolute inset-0 flex">
+            <div className="w-1/2 h-full bg-indigo-900/20 relative overflow-hidden">
+              <img src={myChar.avatarUrl} className="absolute inset-0 w-full h-full object-cover opacity-60" />
+            </div>
+            <div className="w-1/2 h-full bg-red-900/20 relative overflow-hidden">
+              <img src={opponent.avatarUrl} className="absolute inset-0 w-full h-full object-cover opacity-60" />
+            </div>
+          </div>
+
+          <div className="absolute inset-0 flex items-end justify-between p-4 pb-10 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent">
             <div className="text-left z-10">
               <div className="text-indigo-400 font-bold text-lg">{myChar.name}</div>
               <Badge color="bg-indigo-600">{myChar.elo} RP</Badge>
             </div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-               <div className="w-16 h-16 bg-[#0f172a] rounded-full border-4 border-slate-700 flex items-center justify-center shadow-xl">
-                 <span className="font-black text-red-500 text-2xl italic pr-1">VS</span>
-               </div>
+              <div className="w-16 h-16 bg-[#050b18] rounded-full border-4 border-slate-700 flex items-center justify-center shadow-xl">
+                <span className="font-black text-red-500 text-2xl italic pr-1">VS</span>
+              </div>
             </div>
             <div className="text-right z-10">
               <div className="text-red-400 font-bold text-lg">{opponent.name}</div>
               <Badge color="bg-red-600">{opponent.elo} RP</Badge>
             </div>
-         </div>
-      </div>
-
-      {/* Progress & Logs Area */}
-      <div className="flex-1 bg-[#0f172a] p-5 flex flex-col relative -mt-4 rounded-t-3xl z-20 border-t border-slate-800">
-        <div className="mb-6">
-          <ProgressBar progress={loading ? progress : 100} label={loading ? "전투 시뮬레이션 중..." : "전투 종료"} />
-          <div className="text-slate-500 text-xs mt-2 text-right">{loading ? 'AI 연산 중...' : '결과 산출 완료'}</div>
+          </div>
         </div>
 
-        {battleResult ? (
-           <div className="flex-1 overflow-y-auto space-y-3 pb-20">
-             {battleResult.winnerId === myChar.id ? (
-                <div className="bg-indigo-900/30 border border-indigo-500/50 p-4 rounded-xl text-center mb-4">
+        {/* Progress & Logs Area */}
+        <div className="bg-[#050b18] border-t border-slate-900/60 px-5 pt-5 pb-6 flex flex-col gap-4">
+          <div>
+            <ProgressBar
+              progress={loading ? progress : 100}
+              label={loading ? '전투 시뮬레이션 중...' : '전투 종료'}
+            />
+            <div className="text-slate-500 text-[11px] mt-2 text-right">
+              {loading ? 'AI 연산 중...' : '결과 산출 완료'}
+            </div>
+          </div>
+
+          {battleResult ? (
+            <div className="max-h-[220px] overflow-y-auto space-y-3 pr-1">
+              {battleResult.winnerId === myChar.id ? (
+                <div className="bg-indigo-900/30 border border-indigo-500/50 p-4 rounded-xl text-center">
                   <h3 className="text-2xl font-black text-indigo-400 uppercase mb-1">VICTORY</h3>
                   <p className="text-indigo-200 text-sm">승리하여 Elo 점수를 획득했습니다!</p>
                 </div>
-             ) : (
-                <div className="bg-red-900/30 border border-red-500/50 p-4 rounded-xl text-center mb-4">
+              ) : (
+                <div className="bg-red-900/30 border border-red-500/50 p-4 rounded-xl text-center">
                   <h3 className="text-2xl font-black text-red-500 uppercase mb-1">DEFEAT</h3>
                   <p className="text-red-200 text-sm">패배하여 Elo 점수가 하락했습니다.</p>
                 </div>
-             )}
-             
-             {battleResult.logs.map((log, i) => (
-               <div key={i} className={`text-sm p-3 rounded-lg ${log.attackerName === myChar.name ? 'bg-slate-800 text-slate-300' : 'bg-slate-800/50 text-slate-400'}`}>
-                 <span className={`font-bold mr-2 ${log.attackerName === myChar.name ? 'text-indigo-400' : 'text-red-400'}`}>
-                   {log.attackerName}
-                 </span>
-                 {log.description}
-               </div>
-             ))}
-           </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-slate-600">
-             <div className="animate-pulse">로그 생성 대기 중...</div>
-          </div>
-        )}
+              )}
 
-        {!loading && (
-          <div className="absolute bottom-5 left-5 right-5">
-            <Button fullWidth onClick={onClose} variant="blue">결과 확인</Button>
-          </div>
-        )}
+              {battleResult.logs.map((log, i) => (
+                <div
+                  key={i}
+                  className={`text-sm p-3 rounded-lg ${
+                    log.attackerName === myChar.name
+                      ? 'bg-slate-800 text-slate-300'
+                      : 'bg-slate-800/50 text-slate-400'
+                  }`}
+                >
+                  <span
+                    className={`font-bold mr-2 ${
+                      log.attackerName === myChar.name ? 'text-indigo-400' : 'text-red-400'
+                    }`}
+                  >
+                    {log.attackerName}
+                  </span>
+                  {log.description}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="max-h-[220px] flex items-center justify-center text-slate-600">
+              <div className="animate-pulse">로그 생성 대기 중...</div>
+            </div>
+          )}
+
+          {!loading && (
+            <Button fullWidth onClick={onClose} variant="blue">
+              결과 확인
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 // 4. Detailed Character View
-const CharacterDetail: React.FC<{ char: Character; onBack: () => void; onBattle: () => void; onDelete: () => void }> = ({ char, onBack, onBattle, onDelete }) => {
+const CharacterDetail: React.FC<{
+  char: Character;
+  onBack: () => void;
+  onBattle: () => void;
+  onDelete: () => void;
+  currentView: string;
+  onNavigate: (view: string) => void;
+}> = ({ char, onBack, onBattle, onDelete, currentView, onNavigate }) => {
   const [tab, setTab] = useState('소개');
 
+  const { rankPosition, totalChars } = React.useMemo(() => {
+    const roster = Storage.getAllCharacters().sort((a, b) => b.elo - a.elo);
+    const idx = roster.findIndex((c) => c.id === char.id);
+    return {
+      rankPosition: idx >= 0 ? idx + 1 : null,
+      totalChars: roster.length,
+    };
+  }, [char.id, char.elo]);
+
   const handleDelete = () => {
-    if (window.confirm(`${char.name} 캐릭터를 삭제할까요? 이 작업은 되돌릴 수 없습니다.`)) {
+    if (
+      window.confirm(
+        `${char.name} 캐릭터를 삭제할까요? 이 작업은 되돌릴 수 없습니다.`
+      )
+    ) {
       onDelete();
     }
   };
 
+  const winRate =
+    char.matches > 0
+      ? Math.round((char.wins / Math.max(1, char.matches)) * 100)
+      : 0;
+  const tier = (() => {
+    if (char.elo >= 1900) return { label: 'SS랭크', subtitle: '신화의 존재' };
+    if (char.elo >= 1600) return { label: 'S랭크', subtitle: '전설의 영웅' };
+    if (char.elo >= 1400) return { label: 'A랭크', subtitle: '정예 용사' };
+    if (char.elo >= 1200) return { label: 'B랭크', subtitle: '숙련된 전사' };
+    if (char.elo >= 1000) return { label: 'C랭크', subtitle: '길들여진 영웅' };
+    return { label: 'E랭크', subtitle: '이름 없는 자' };
+  })();
+
+  const epithetSource = char.personality || char.prompt || '';
+  const epithet = epithetSource
+    ? `『${epithetSource.slice(0, 12)}${epithetSource.length > 12 ? '…' : ''}』`
+    : '『미상』';
+
+  const statCards = [
+    {
+      label: '전체 랭킹',
+      value: rankPosition ? `#${rankPosition.toLocaleString()}` : '집계 중',
+      sub: totalChars
+        ? `총 ${totalChars.toLocaleString()}명 중`
+        : '데이터 없음',
+    },
+    {
+      label: 'Elo Score',
+      value: char.elo.toLocaleString(),
+      sub: '실시간 전투 지표',
+    },
+    {
+      label: '승률',
+      value: `${winRate}%`,
+      sub: `${char.wins}승 ${char.losses}패`,
+    },
+    {
+      label: '전체 전투수',
+      value: char.matches.toLocaleString(),
+      sub: '시뮬레이션 포함',
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#0f172a] pb-20">
-      {/* Header Image */}
-      <div className="relative h-[35vh]">
-        <img src={char.avatarUrl} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent"></div>
-        <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-10 gap-2">
-          <button onClick={onBack} className="p-2 rounded-full bg-black/30 backdrop-blur text-white"><ChevronLeft /></button>
-          <div className="flex gap-2">
-            <button onClick={handleDelete} className="p-2 rounded-full bg-black/40 backdrop-blur text-red-300 border border-red-500/40" title="캐릭터 삭제">
-              <Skull size={20} />
-            </button>
-            <button className="p-2 rounded-full bg-black/30 backdrop-blur text-white"><Crown size={20} /></button>
+    <div className="min-h-screen bg-[#0f172a] pb-40 text-slate-100">
+      <Container
+        contentClassName="p-0"
+        frameClassName="rounded-none shadow-[0_24px_60px_rgba(2,6,23,0.75)] border border-slate-900/30"
+      >
+        <section className="px-5 pt-5 pb-8 space-y-6">
+          <div className="rounded-[32px] border border-slate-800 bg-[#050b18] shadow-[0_24px_40px_rgba(2,6,23,0.6)] p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={onBack}
+                className="p-2 rounded-full bg-slate-900 text-white border border-slate-700"
+              >
+                <ChevronLeft />
+              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDelete}
+                  className="p-2 rounded-full bg-slate-900 text-red-200 border border-red-500/40"
+                  title="캐릭터 삭제"
+                >
+                  <Skull size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="relative w-full max-w-[360px] mx-auto aspect-square rounded-[20px] overflow-hidden bg-slate-900 border border-slate-700">
+              <img
+                src={char.avatarUrl}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70"></div>
+            </div>
+
+            <div className="text-center space-y-2">
+              <div className="text-[11px] tracking-[0.35em] text-slate-500 uppercase">
+                {epithet}
+              </div>
+              <h1 className="text-3xl font-black text-white">{char.name}</h1>
+              <div className="flex items-center justify-center gap-2">
+                <span className="px-4 py-1 rounded-full bg-slate-900/80 border border-slate-700 text-xs font-semibold text-slate-200">
+                  {tier.label}
+                </span>
+                <Badge color="bg-indigo-600/80">{char.world}</Badge>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="absolute bottom-0 left-0 w-full p-6">
-          <Badge color="bg-indigo-600" className="mb-2">{char.world}</Badge>
-          <h1 className="text-3xl font-bold text-white">{char.name}</h1>
-          <div className="text-indigo-400 font-bold text-lg mt-1">Elo {char.elo}</div>
-        </div>
-      </div>
+        </section>
 
-      {/* Content */}
-      <div className="px-6 -mt-4 relative z-10">
-        <Tabs options={['소개', '능력']} active={tab} onChange={setTab} />
-        
-        {tab === '소개' && (
-          <div className="space-y-6 animate-fade-in">
-             <div className="text-slate-300 leading-relaxed text-sm">
-               {char.bio}
-             </div>
-             
-             {/* Story Progress Card */}
-             <Card className="bg-[#1e293b]">
-               <div className="flex justify-between items-center mb-2">
-                 <h4 className="font-bold text-white">Ep.3 완성까지</h4>
-                 <span className="text-xs text-indigo-400 font-bold">승리 {char.wins}/30</span>
-               </div>
-               <p className="text-slate-400 text-xs italic mb-3">"넘어진 그 자리에서 다시 일어서라"</p>
-               <ProgressBar progress={(char.wins / 30) * 100} />
-             </Card>
+        <section className="border-t border-slate-800/70 px-6 py-6 space-y-4">
+          <div className="flex justify-end">
+            <button className="w-1/4 min-w-[120px] flex items-center justify-center gap-1 px-3 py-2 rounded-2xl border border-slate-600 text-slate-300 text-[11px] font-semibold hover:border-indigo-500 hover:text-white transition">
+              <Share2 size={14} /> 프로필 공유
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {statCards.map((card) => (
+              <div
+                key={card.label}
+                className="border border-slate-800 bg-[#030918] p-4 rounded-2xl"
+              >
+                <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-2">
+                  {card.label}
+                </div>
+                <div className="text-2xl font-black text-white">
+                  {card.value}
+                </div>
+                <div className="text-xs text-slate-500 mt-1">{card.sub}</div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-             <Card className="flex items-start gap-4">
+        <section className="border-t border-slate-800/70 px-6 py-6">
+          <Tabs options={['소개', '능력']} active={tab} onChange={setTab} />
+
+          {tab === '소개' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="text-slate-300 leading-relaxed text-sm">
+                {char.bio}
+              </div>
+
+              <div className="bg-[#141d35] border border-slate-800 p-4 rounded-2xl">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-bold text-white">Ep.3 완성까지</h4>
+                  <span className="text-xs text-indigo-400 font-bold">
+                    승리 {char.wins}/30
+                  </span>
+                </div>
+                <p className="text-slate-400 text-xs italic mb-3">
+                  "넘어진 그 자리에서 다시 일어서라"
+                </p>
+                <ProgressBar progress={(char.wins / 30) * 100} />
+              </div>
+
+              <div className="flex items-start gap-4 bg-[#141d35] border border-slate-800 p-4 rounded-2xl">
                 <Avatar src={char.avatarUrl} alt={char.name} size="md" />
                 <div>
-                  <h4 className="font-bold text-white text-sm">{char.name} 탄생 스토리</h4>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">{char.prompt}</p>
+                  <h4 className="font-bold text-white text-sm">
+                    {char.name} 탄생 스토리
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                    {char.prompt}
+                  </p>
                 </div>
-             </Card>
-          </div>
-        )}
+              </div>
+            </div>
+          )}
 
-        {tab === '능력' && (
-          <div className="space-y-4 animate-fade-in">
-             <div className="flex flex-wrap gap-2 mb-4">
-               {char.skills.map((s, i) => (
-                 <div key={i} className="w-full bg-[#1e293b] p-4 rounded-xl border border-slate-700">
+          {tab === '능력' && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {char.skills.map((s, i) => (
+                  <div
+                    key={i}
+                    className="w-full bg-[#141d35] p-4 border border-slate-800 rounded-2xl"
+                  >
                     <div className="flex justify-between mb-2">
-                      <span className="text-indigo-300 font-bold">{s.name}</span>
-                      <div className="flex gap-1">
-                        {s.tags.map(t => <Badge key={t} color="bg-slate-700">{t}</Badge>)}
+                      <span className="text-indigo-300 font-bold">
+                        {s.name}
+                      </span>
+                      <div className="flex gap-1 flex-wrap">
+                        {s.tags.map((t) => (
+                          <Badge key={t} color="bg-slate-700">
+                            {t}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
-                    <p className="text-slate-400 text-xs">{s.description}</p>
-                 </div>
-               ))}
-             </div>
-             
-             {/* Unlockable Placeholder */}
-             <div className="border border-dashed border-slate-700 rounded-xl p-6 text-center">
+                    <p className="text-slate-400 text-xs">{s.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border border-dashed border-slate-700 p-6 text-center rounded-2xl">
                 <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-600">
                   <Plus />
                 </div>
-                <p className="text-slate-500 text-sm">승리 15회 달성 시<br/>새로운 스킬 슬롯 해금</p>
-             </div>
-          </div>
-        )}
+                <p className="text-slate-500 text-sm">
+                  승리 15회 달성 시
+                  <br />
+                  새로운 스킬 슬롯 해금
+                </p>
+              </div>
+            </div>
+          )}
+        </section>
+      </Container>
+
+      <div className="fixed bottom-32 left-0 right-0">
+        <div className="w-full max-w-[520px] mx-auto px-6 py-4 flex justify-center">
+          <Button
+            variant="blue"
+            size="lg"
+            className="w-[40%] min-w-[170px] shadow-2xl shadow-blue-900/50 py-4 text-base whitespace-nowrap"
+            onClick={onBattle}
+          >
+            <Swords className="mr-2 flex-shrink-0" />
+            <span className="whitespace-nowrap">배틀 시작</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Floating Action Button */}
-      <div className="fixed bottom-24 left-0 right-0 px-6 max-w-md mx-auto">
-        <Button fullWidth variant="blue" className="shadow-2xl shadow-blue-900/50 py-4 text-lg" onClick={onBattle}>
-           <Swords className="mr-2" /> 배틀 시작
-        </Button>
-      </div>
+      <BottomNav
+        current={currentView}
+        onChange={(target) => {
+          onNavigate(target);
+        }}
+        maxWidthClass="max-w-[520px]"
+      />
     </div>
   );
 };
@@ -621,6 +786,11 @@ const App: React.FC = () => {
         onBack={() => setSelectedChar(null)} 
         onBattle={() => setIsBattling(true)}
         onDelete={() => handleDeleteCharacter(selectedChar.id)}
+        currentView={view}
+        onNavigate={(target) => {
+          setSelectedChar(null);
+          setView(target);
+        }}
       />
     );
   }

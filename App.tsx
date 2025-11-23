@@ -1,8 +1,9 @@
+// [확인용] 깃허브 연동 테스트 주석입니다.
 import React, { useState, useEffect } from 'react';
 import { User, Character, WorldType, BattleResult } from './types';
 import * as Storage from './services/storageService';
 import * as GameService from './services/gameService';
-import * as AIService from './services/geminiService';
+import * as AIService from './services/aiService';
 import { Button, Card, Input, TextArea, Container, BottomNav, Badge, Tabs, Avatar, ProgressBar } from './components/UIComponents';
 import { Swords, Trophy, Skull, Zap, ChevronLeft, Plus, Crown, Clock } from 'lucide-react';
 
@@ -577,6 +578,13 @@ const App: React.FC = () => {
     const loadedUser = Storage.getCurrentUser();
     if (loadedUser) setUser(loadedUser);
   }, []);
+
+  // [Test Hook] Trigger AI Test on Login
+  useEffect(() => {
+    if (user) {
+      AIService.testConnection();
+    }
+  }, [user]);
 
   if (!user) {
     return <LoginPage onLogin={() => setUser(Storage.getCurrentUser())} />;

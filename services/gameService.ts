@@ -1,6 +1,6 @@
 import { Character, BattleResult, BattleLog, AIBattleResponse } from '../types';
 import * as Storage from './storageService';
-import * as AIService from './geminiService';
+import * as AIService from './aiService';
 
 const K_FACTOR = 32; // Standard K-factor for Elo
 

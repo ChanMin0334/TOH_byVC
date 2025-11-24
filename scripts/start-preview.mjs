@@ -1,6 +1,12 @@
-import { preview } from 'vite';
+import { build, preview } from 'vite';
 
 const port = Number(process.env.PORT) || 4173;
+
+if (!process.env.SKIP_BUILD) {
+  console.log('[vite] building production bundle...');
+  await build();
+  console.log('[vite] build complete');
+}
 
 const server = await preview({
   preview: {

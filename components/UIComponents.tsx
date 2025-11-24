@@ -18,7 +18,7 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'md',
   ...props 
 }) => {
-  const base = "rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
+  const base = "rounded-2xl font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110";
   const widthClass = fullWidth ? "w-full" : "";
   
   const sizeClasses = {
@@ -28,11 +28,11 @@ export const Button: React.FC<ButtonProps> = ({
   };
   
   const variants = {
-    primary: "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/50",
-    blue: "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50",
-    secondary: "bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600",
-    danger: "bg-red-600 hover:bg-red-500 text-white",
-    ghost: "bg-transparent hover:bg-slate-800/50 text-slate-400"
+    primary: "bg-gradient-to-r from-[#825bff] via-[#ec4899] to-[#f97316] text-white",
+    blue: "bg-gradient-to-r from-[#22d3ee] to-[#3b82f6] text-slate-900",
+    secondary: "bg-white/10 hover:bg-white/15 text-slate-100 border border-white/15",
+    danger: "bg-gradient-to-r from-[#ef4444] to-[#f97316] text-white",
+    ghost: "bg-transparent hover:bg-white/10 text-slate-300"
   };
 
   return (
@@ -45,8 +45,8 @@ export const Button: React.FC<ButtonProps> = ({
 
 // --- Card ---
 export const Card: React.FC<{ children: ReactNode; className?: string; title?: string }> = ({ children, className, title }) => (
-  <div className={`bg-[#1e293b] rounded-2xl p-5 shadow-xl border border-slate-700/50 ${className || ''}`}>
-    {title && <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">{title}</h3>}
+  <div className={`bg-white/5 rounded-3xl p-6 border border-white/10 ${className || ''}`}>
+    {title && <h3 className="text-lg font-bold text-white mb-4 border-b border-white/10 pb-2">{title}</h3>}
     {children}
   </div>
 );
@@ -61,7 +61,7 @@ export const Avatar: React.FC<{ src?: string; alt: string; size?: 'sm' | 'md' | 
   };
   
   return (
-    <div className={`${sizes[size]} rounded-full overflow-hidden bg-slate-700 border-2 border-slate-600 flex-shrink-0 ${className || ''}`}>
+    <div className={`${sizes[size]} rounded-full overflow-hidden bg-white/10 border border-white/20 flex-shrink-0 ${className || ''}`}>
       {src ? (
         <img src={src} alt={alt} className="w-full h-full object-cover" />
       ) : (
@@ -74,23 +74,29 @@ export const Avatar: React.FC<{ src?: string; alt: string; size?: 'sm' | 'md' | 
 };
 
 // --- Badge ---
-export const Badge: React.FC<{ children: ReactNode; color?: string; className?: string }> = ({ children, color = "bg-slate-700", className }) => (
+export const Badge: React.FC<{ children: ReactNode; color?: string; className?: string }> = ({ children, color = "bg-white/10", className }) => (
   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold text-white uppercase tracking-wider ${color} ${className || ''}`}>
     {children}
   </span>
 );
 
 // --- Input/Textarea ---
-export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => (
-  <input className="w-full bg-[#050b18] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-500" {...props} />
+export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ className = '', ...props }) => (
+  <input
+    className={`w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/40 transition-colors placeholder-slate-400 ${className}`}
+    {...props}
+  />
 );
 
-export const TextArea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = (props) => (
-  <textarea className="w-full bg-[#050b18] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-500 min-h-[120px]" {...props} />
+export const TextArea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = ({ className = '', ...props }) => (
+  <textarea
+    className={`w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/40 transition-colors placeholder-slate-400 min-h-[120px] ${className}`}
+    {...props}
+  />
 );
 
 // --- Layout Container ---
-interface ContainerProps {
+export interface ContainerProps {
   children: ReactNode;
   className?: string;
   frameClassName?: string;
@@ -108,10 +114,11 @@ export const Container: React.FC<ContainerProps> = ({ children, className = '', 
   }
 
   return (
-    <div className="w-full max-w-[520px] mx-auto px-4 pb-28 pt-0 min-h-screen">
-      <div className={`bg-[#050b18] rounded-none shadow-[0_24px_60px_rgba(2,6,23,0.75)] overflow-hidden border border-slate-900/30 ${frameClassName}`}>
+    <div className="bg-[#121212] w-full max-w-[520px] mx-auto px-4 pt-0 min-h-screen pt-4">
+      <div className={`rounded-[32px] overflow-hidden ${frameClassName}`}>
         <div className={`${contentClassName} ${className}`}>
           {children}
+          <div className="h-[200px]"></div>
         </div>
       </div>
     </div>
@@ -129,16 +136,16 @@ export const BottomNav: React.FC<{ current: string; onChange: (page: string) => 
   return (
     <div className="fixed bottom-0 left-0 right-0 pt-3 z-40">
       <div className={`w-full ${maxWidthClass} mx-auto`}>
-        <div className="bg-[#050b18] border border-slate-900/30 shadow-[0_-12px_40px_rgba(2,6,23,0.6)] flex justify-around items-center px-6 py-3">
+        <div className="bg-[#050914]/95 border border-white/10 flex justify-around items-center px-6 py-3">
           {navItems.map(item => {
             const isActive = current === item.id;
             return (
               <button 
                 key={item.id}
                 onClick={() => onChange(item.id)}
-                className={`flex flex-col items-center gap-1 p-2 transition-colors ${isActive ? 'text-blue-500' : 'text-slate-500'}`}
+                className={`flex flex-col items-center gap-1 p-2 transition-colors ${isActive ? 'text-cyan-300' : 'text-slate-500'}`}
               >
-                <div className={`p-1 rounded-full ${isActive ? 'bg-blue-500/20' : ''}`}>
+                <div className={`p-1 rounded-full ${isActive ? 'bg-cyan-400/20' : ''}`}>
                   <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                 </div>
                 <span className="text-[10px] font-medium">{item.label}</span>
@@ -151,17 +158,41 @@ export const BottomNav: React.FC<{ current: string; onChange: (page: string) => 
   );
 };
 
+interface ScreenLayoutProps {
+  children: ReactNode;
+  currentView: string;
+  onNavigate: (page: string) => void;
+  containerProps?: Partial<ContainerProps>;
+  bottomSlot?: ReactNode;
+  className?: string;
+}
+
+export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
+  children,
+  currentView,
+  onNavigate,
+  containerProps,
+  bottomSlot,
+  className = '',
+}) => (
+  <div className={`bg-gradient-to-b from-[#030712] via-[#060d1d] to-[#0b1224] min-h-screen text-slate-100 font-sans pb-20 ${className}`}>
+    <Container {...containerProps}>{children}</Container>
+    {bottomSlot}
+    <BottomNav current={currentView} onChange={onNavigate} />
+  </div>
+);
+
 // --- Tabs ---
 export const Tabs: React.FC<{ options: string[]; active: string; onChange: (opt: string) => void }> = ({ options, active, onChange }) => (
-  <div className="flex bg-[#050b18] p-1 rounded-xl mb-4 border border-slate-700/60">
+  <div className="flex bg-white/5 p-1 rounded-2xl mb-4 border border-white/10">
     {options.map(opt => (
       <button
         key={opt}
         onClick={() => onChange(opt)}
         className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
           active === opt 
-            ? 'bg-[#1e293b] text-white shadow-sm' 
-            : 'text-slate-500 hover:text-slate-300'
+            ? 'bg-gradient-to-r from-[#312e81] to-[#5b21b6] text-white'
+            : 'text-slate-400 hover:text-slate-200'
         }`}
       >
         {opt}
@@ -171,13 +202,13 @@ export const Tabs: React.FC<{ options: string[]; active: string; onChange: (opt:
 );
 
 // --- ProgressBar ---
-export const ProgressBar: React.FC<{ progress: number; color?: string; label?: string }> = ({ progress, color = "bg-blue-600", label }) => (
+export const ProgressBar: React.FC<{ progress: number; color?: string; label?: string }> = ({ progress, color = "bg-gradient-to-r from-[#22d3ee] to-[#3b82f6]", label }) => (
   <div className="w-full">
     {label && <div className="flex justify-between text-xs text-slate-400 mb-1">
       <span>{label}</span>
       <span>{Math.round(progress)}%</span>
     </div>}
-    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
       <div 
         className={`h-full ${color} transition-all duration-1000 ease-out`} 
         style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} 

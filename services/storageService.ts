@@ -9,6 +9,18 @@ const KEYS = {
 };
 
 // User Management
+export const saveOrUpdateUser = (user: User): User => {
+  const users = getUsers();
+  const index = users.findIndex(u => u.id === user.id);
+  if (index >= 0) {
+    users[index] = user;
+  } else {
+    users.push(user);
+  }
+  localStorage.setItem(KEYS.USERS, JSON.stringify(users));
+  return user;
+};
+
 export const registerUser = (username: string): User => {
   const users = getUsers();
   const existing = users.find(u => u.username === username);
@@ -19,9 +31,7 @@ export const registerUser = (username: string): User => {
     username,
     createdAt: Date.now()
   };
-  users.push(newUser);
-  localStorage.setItem(KEYS.USERS, JSON.stringify(users));
-  return newUser;
+  return saveOrUpdateUser(newUser);
 };
 
 export const getUsers = (): User[] => {

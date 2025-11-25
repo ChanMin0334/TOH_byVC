@@ -6,7 +6,7 @@ import { AICharacterResponse, AIBattleResponse, Character, WorldType } from '../
  * - Requests are sent directly from the browser; to avoid leaking secrets in production,
  *   proxy the call through your own backend instead.
  */
-const API_URL = import.meta.env.VITE_ADOTX_API_URL ?? 'https://guest-api.sktax.chat/v1/chat/completions';
+const API_URL = import.meta.env.VITE_ADOTX_API_URL ?? '/api/chat';
 const API_KEY = import.meta.env.VITE_ADOTX_API_KEY ?? 'sktax-XyeKFrq67ZjS4EpsDlrHHXV8it';
 const API_MODEL = import.meta.env.VITE_ADOTX_MODEL ?? 'ax4';
 

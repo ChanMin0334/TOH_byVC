@@ -7,7 +7,7 @@ import * as AIService from './services/aiService';
 import * as AuthService from './services/authService';
 import { generateId } from './utils/id';
 import { Button, Card, Input, TextArea, Container, BottomNav, Badge, Tabs, Avatar, ProgressBar, ScreenLayout } from './components/UIComponents';
-import { Swords, Trophy, Zap, ChevronLeft, Plus, Crown, Clock, Share2, Trash2 } from 'lucide-react';
+import { Swords, Trophy, Zap, ChevronLeft, Plus, Crown, Clock, Share2, Trash2, Copy, Check } from 'lucide-react';
 import tohLogo from './src/assets/TOH.png';
 
 // --- SUB-PAGES ---
@@ -811,21 +811,68 @@ const RankingPage: React.FC = () => {
   );
 };
 
-const ProfilePage: React.FC<{ user: User; firebaseUid?: string | null; onLogout: () => void; isLoggingOut: boolean }> = ({ user, firebaseUid, onLogout, isLoggingOut }) => (
-  <Container className="flex flex-col items-center justify-center text-center gap-5 text-slate-400">
-    <Avatar alt={user.username} className="w-20 h-20" />
-    <div>
-      <div className="text-white font-semibold text-lg">{user.username}</div>
-      <p className="text-sm text-slate-500 mt-1">프로필 페이지 준비 중입니다.</p>
-      {firebaseUid && (
-        <p className="text-xs text-slate-600 mt-2">UID: {firebaseUid}</p>
-      )}
-    </div>
-    <Button variant="secondary" className="w-full max-w-xs" onClick={onLogout} isLoading={isLoggingOut}>
-      로그아웃
-    </Button>
-  </Container>
-);
+const ProfilePage: React.FC<{ user: User; firebaseUid?: string | null; onLogout: () => void; isLoggingOut: boolean }> = ({ user, firebaseUid, onLogout, isLoggingOut }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyUid = async () => {
+    if (!firebaseUid) return;
+    try {
+      await navigator.clipboard?.writeText(firebaseUid);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      console.error('Failed to copy UID', err);
+    }
+  };
+
+  return (
+    <Container className="pt-10" contentClassName="p-8">
+      <div className="w-full max-w-sm mx-auto space-y-6 text-center">
+        <div className="bg-gradient-to-b from-[#1f2937] via-[#111827] to-[#050a12] rounded-3xl p-6 border border-white/5 shadow-2xl shadow-cyan-500/10">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-cyan-400/30 blur-2xl"></div>
+              <Avatar alt={user.username} size="xl" className="relative border-2 border-cyan-400/30" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.25em] text-cyan-300/70">Hero</p>
+              <h2 className="text-3xl font-black text-white mt-1">{user.username}</h2>
+              <p className="text-sm text-slate-400 mt-2">프로필 페이지가 곧 확장됩니다.</p>
+            </div>
+          </div>
+        </div>
+
+        {firebaseUid && (
+          <div className="bg-[#0b1220] border border-slate-800 rounded-3xl p-5 text-left space-y-3">
+            <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-slate-500">
+              <span>Firebase UID</span>
+              {copied && <span className="text-emerald-400 font-semibold tracking-normal">복사됨!</span>}
+            </div>
+            <div className="flex items-center gap-3">
+              <code className="flex-1 text-sm text-white break-all bg-black/30 border border-slate-800 rounded-2xl px-3 py-2">
+                {firebaseUid}
+              </code>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="border border-white/10 px-3"
+                onClick={handleCopyUid}
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? '복사됨' : '복사'}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <Button variant="secondary" className="w-full" onClick={onLogout} isLoading={isLoggingOut}>
+          로그아웃
+        </Button>
+      </div>
+    </Container>
+  );
+};
 
 // --- MAIN APP COMPONENT ---
 

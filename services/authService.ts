@@ -12,3 +12,5 @@ export const signInWithGoogle = async (): Promise<User> => {
 };
 
 export const signOutFirebase = () => signOut(auth);
+
+export const getCurrentFirebaseUser = () => auth.currentUser;

@@ -8,12 +8,17 @@ import * as AuthService from './services/authService';
 import { generateId } from './utils/id';
 import { Button, Card, Input, TextArea, Container, BottomNav, Badge, Tabs, Avatar, ProgressBar, ScreenLayout } from './components/UIComponents';
 import { Swords, Trophy, Zap, ChevronLeft, Plus, Crown, Clock, Share2, Trash2 } from 'lucide-react';
-import tohLogo from './assets/TOH.png';
+import tohLogo from './src/assets/TOH.png';
 
 // --- SUB-PAGES ---
 
 // 1. Login Page
-const LoginPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
+type LoginPageProps = {
+  onLogin: () => void;
+  onSetFirebaseUid: (uid: string) => void;
+};
+
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSetFirebaseUid }) => {
   const [oauthLoading, setOauthLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -34,6 +39,7 @@ const LoginPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
       };
       Storage.saveOrUpdateUser(oauthUser);
       Storage.setCurrentUser(oauthUser);
+      onSetFirebaseUid(firebaseUser.uid);
       onLogin();
     } catch (err) {
       console.error(err);
@@ -121,66 +127,6 @@ const CreatePage: React.FC<{ user: User; onFinish: () => void }> = ({ user, onFi
       onFinish();
     }
   };
-
-  if (step === 'loading') {
-    return (
-      <Container className="flex flex-col items-center justify-center h-[80vh]">
-        <div className="relative">
-          <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 rounded-full animate-pulse"></div>
-          <div className="w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-8 relative z-10"></div>
-        </div>
-        <h2 className="text-2xl font-bold text-white mb-2">영웅을 소환 중...</h2>
-        <p className="text-slate-400 text-sm text-center max-w-xs">
-          AI가 당신의 이야기를 바탕으로<br/>새로운 영웅의 운명을 짓고 있습니다.
-        </p>
-      </Container>
-    );
-  }
-
-  if (step === 'preview' && generatedChar) {
-    return (
-      <Container>
-        <div className="sticky top-0 bg-[#0f172a] z-10 py-4 flex items-center justify-between">
-          <button onClick={() => setStep('input')} className="p-2 -ml-2 text-slate-400"><ChevronLeft /></button>
-          <h2 className="font-bold text-white">생성 완료</h2>
-          <div className="w-8"></div>
-        </div>
-
-        <div className="bg-[#1e293b] rounded-3xl overflow-hidden border border-slate-700 mb-6">
-          <div className="aspect-[3/4] bg-slate-800 relative">
-             <img src={generatedChar.avatarUrl} alt="Hero" className="w-full h-full object-cover" />
-             <div className="absolute inset-0 bg-gradient-to-t from-[#1e293b] via-transparent to-transparent"></div>
-             <div className="absolute bottom-0 left-0 p-6">
-               <Badge color="bg-indigo-500" className="mb-2">{generatedChar.world}</Badge>
-               <h1 className="text-3xl font-black text-white leading-none mb-1">{generatedChar.name}</h1>
-               <p className="text-slate-300 text-sm opacity-90">{generatedChar.personality}</p>
-             </div>
-          </div>
-          <div className="p-6 space-y-6">
-             <div>
-               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">배경 스토리</h3>
-               <p className="text-sm text-slate-300 leading-relaxed">{generatedChar.bio}</p>
-             </div>
-             <div>
-               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">보유 스킬</h3>
-               <div className="flex flex-wrap gap-2">
-                 {generatedChar.skills?.map((s, i) => (
-                   <span key={i} className="px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-bold text-indigo-300 border border-slate-700">
-                     {s.name}
-                   </span>
-                 ))}
-               </div>
-             </div>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3 mb-10">
-          <Button variant="secondary" onClick={() => setStep('input')}>다시 하기</Button>
-          <Button variant="blue" onClick={handleSave}>영웅 영입</Button>
-        </div>
-      </Container>
-    );
-  }
 
   return (
     <Container>
@@ -865,12 +811,15 @@ const RankingPage: React.FC = () => {
   );
 };
 
-const ProfilePage: React.FC<{ user: User; onLogout: () => void; isLoggingOut: boolean }> = ({ user, onLogout, isLoggingOut }) => (
+const ProfilePage: React.FC<{ user: User; firebaseUid?: string | null; onLogout: () => void; isLoggingOut: boolean }> = ({ user, firebaseUid, onLogout, isLoggingOut }) => (
   <Container className="flex flex-col items-center justify-center text-center gap-5 text-slate-400">
     <Avatar alt={user.username} className="w-20 h-20" />
     <div>
       <div className="text-white font-semibold text-lg">{user.username}</div>
       <p className="text-sm text-slate-500 mt-1">프로필 페이지 준비 중입니다.</p>
+      {firebaseUid && (
+        <p className="text-xs text-slate-600 mt-2">UID: {firebaseUid}</p>
+      )}
     </div>
     <Button variant="secondary" className="w-full max-w-xs" onClick={onLogout} isLoading={isLoggingOut}>
       로그아웃
@@ -894,6 +843,7 @@ const App: React.FC = () => {
   const [selectedChar, setSelectedChar] = useState<Character | null>(null);
   const [isBattling, setIsBattling] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [firebaseUid, setFirebaseUid] = useState<string | null>(null);
 
   const handleDeleteCharacter = (charId: string) => {
     Storage.deleteCharacter(charId);
@@ -924,6 +874,7 @@ const App: React.FC = () => {
       setSelectedChar(null);
       setIsBattling(false);
       setUser(null);
+      setFirebaseUid(null);
       setView('home');
       if (typeof window !== 'undefined') {
         window.location.hash = 'home';
@@ -936,6 +887,10 @@ const App: React.FC = () => {
     Storage.seedDatabase(); 
     const loadedUser = Storage.getCurrentUser();
     if (loadedUser) setUser(loadedUser);
+    const fbUser = AuthService.getCurrentFirebaseUser?.();
+    if (fbUser?.uid) {
+      setFirebaseUid(fbUser.uid);
+    }
   }, []);
 
   useEffect(() => {
@@ -954,7 +909,7 @@ const App: React.FC = () => {
   }, []);
 
   if (!user) {
-    return <LoginPage onLogin={() => setUser(Storage.getCurrentUser())} />;
+    return <LoginPage onLogin={() => setUser(Storage.getCurrentUser())} onSetFirebaseUid={setFirebaseUid} />;
   }
 
   // Handle detailed view or battle view overrides
@@ -1001,7 +956,14 @@ const App: React.FC = () => {
       )}
       {view === 'create' && <CreatePage user={user} onFinish={() => handleNavigate('home')} />}
       {view === 'ranking' && <RankingPage />}
-      {view === 'profile' && <ProfilePage user={user} onLogout={handleLogout} isLoggingOut={isLoggingOut} />}
+      {view === 'profile' && (
+        <ProfilePage
+          user={user}
+          firebaseUid={firebaseUid}
+          onLogout={handleLogout}
+          isLoggingOut={isLoggingOut}
+        />
+      )}
       
       <BottomNav current={view} onChange={handleNavigate} />
     </div>

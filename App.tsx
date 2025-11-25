@@ -128,6 +128,79 @@ const CreatePage: React.FC<{ user: User; onFinish: () => void }> = ({ user, onFi
     }
   };
 
+  const handleReset = () => {
+    setStep('input');
+    setGeneratedChar(null);
+  };
+
+  if (step === 'loading') {
+    return (
+      <Container className="flex flex-col items-center justify-center text-center gap-6 min-h-screen">
+        <div className="relative">
+          <div className="w-28 h-28 rounded-full border-4 border-indigo-500/30 border-t-transparent animate-spin" />
+          <div className="absolute inset-2 rounded-full border border-indigo-500/20"></div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-white font-semibold text-lg">AI가 영웅을 설계 중...</p>
+          <p className="text-sm text-slate-400">약 5~10초 정도 소요될 수 있습니다.</p>
+        </div>
+        <Button variant="ghost" onClick={handleReset}>취소</Button>
+      </Container>
+    );
+  }
+
+  if (step === 'preview' && generatedChar) {
+    return (
+      <Container>
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">AI Generated</p>
+            <h2 className="text-3xl font-black text-white">{generatedChar.name}</h2>
+            <p className="text-slate-400 text-sm">{generatedChar.personality || '성격 정보 없음'}</p>
+          </div>
+
+          <Card title="영웅 배경">
+            <p className="text-slate-300 leading-relaxed whitespace-pre-line">{generatedChar.bio || '배경 정보가 전달되지 않았습니다.'}</p>
+          </Card>
+
+          {generatedChar.skills && generatedChar.skills.length > 0 && (
+            <Card title="주요 스킬">
+              <div className="space-y-4">
+                {generatedChar.skills.slice(0, 4).map((skill, idx) => (
+                  <div key={idx} className="border border-white/5 rounded-2xl p-4 bg-white/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-white font-bold">{skill.name}</h3>
+                      <span className="text-[11px] text-slate-400">#{idx + 1}</span>
+                    </div>
+                    <p className="text-sm text-slate-300 leading-relaxed">{skill.description}</p>
+                    {skill.tags?.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {skill.tags.map((tag) => (
+                          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-500/40">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          <div className="space-y-3">
+            <Button variant="blue" fullWidth size="lg" onClick={handleSave}>
+              이 영웅으로 확정하기
+            </Button>
+            <Button variant="secondary" fullWidth onClick={handleReset}>
+              다시 입력하기
+            </Button>
+          </div>
+        </div>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <h2 className="text-xl font-bold mb-6 pt-2">새로운 영웅 생성</h2>
@@ -176,7 +249,13 @@ const CreatePage: React.FC<{ user: User; onFinish: () => void }> = ({ user, onFi
           </div>
         </div>
 
-        <Button variant="blue" fullWidth size="lg" onClick={handleGenerate} disabled={!prompt || !name}>
+        <Button
+          variant="blue"
+          fullWidth
+          size="lg"
+          onClick={handleGenerate}
+          disabled={!prompt || !name}
+        >
           운명 생성하기
         </Button>
         <p className="text-center text-xs text-slate-500 mt-2">

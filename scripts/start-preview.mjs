@@ -35,6 +35,7 @@ app.options('/api/chat', (req, res) => {
 app.post('/api/chat', async (req, res) => {
   setCors(res);
   try {
+    console.log('[proxy] forwarding payload:', JSON.stringify(req.body, null, 2));
     const upstream = await fetch(ADOTX_API_URL, {
       method: 'POST',
       headers: {
@@ -48,6 +49,7 @@ app.post('/api/chat', async (req, res) => {
     });
 
     const text = await upstream.text();
+    console.log('[proxy] upstream status:', upstream.status);
     res.status(upstream.status);
     res.setHeader('Content-Type', 'application/json');
     res.send(text);

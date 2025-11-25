@@ -55,6 +55,11 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
       },
+      preview: {
+        host: '0.0.0.0',
+        port: 4173,
+        allowedHosts: true,
+      },
       plugins: [react(), adotxProxy()],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),

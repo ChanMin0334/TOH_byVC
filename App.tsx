@@ -8,6 +8,7 @@ import * as AuthService from './services/authService';
 import { generateId } from './utils/id';
 import { Button, Card, Input, TextArea, Container, BottomNav, Badge, Tabs, Avatar, ProgressBar, ScreenLayout } from './components/UIComponents';
 import { Swords, Trophy, Zap, ChevronLeft, Plus, Crown, Clock, Share2, Trash2 } from 'lucide-react';
+import tohLogo from './assets/TOH.png';
 
 // --- SUB-PAGES ---
 
@@ -424,7 +425,7 @@ const TopBar: React.FC<{ user: User; onProfile: () => void }> = ({ user, onProfi
         <div />
         <div className="flex justify-center">
           <img
-            src="/src/assets/TOH.png"
+            src={tohLogo}
             alt="TOH 로고"
             className="h-14 object-contain"
           />

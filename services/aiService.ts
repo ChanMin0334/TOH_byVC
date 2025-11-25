@@ -6,8 +6,9 @@ import { AICharacterResponse, AIBattleResponse, Character, WorldType } from '../
  * - Requests are sent directly from the browser; to avoid leaking secrets in production,
  *   proxy the call through your own backend instead.
  */
-const API_URL = '/api/chat';
-const API_MODEL = 'ax4';
+const API_URL = import.meta.env.VITE_ADOTX_API_URL ?? 'https://guest-api.sktax.chat/v1/chat/completions';
+const API_KEY = import.meta.env.VITE_ADOTX_API_KEY ?? 'sktax-XyeKFrq67ZjS4EpsDlrHHXV8it';
+const API_MODEL = import.meta.env.VITE_ADOTX_MODEL ?? 'ax4';
 
 // Proxy를 사용하므로 항상 실시간 호출을 사용한다.
 const USE_MOCK_AI = false;
@@ -18,11 +19,16 @@ type ChatMessage = {
 };
 
 const callAdotxChat = async (messages: ChatMessage[]): Promise<string> => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  if (API_KEY) {
+    headers.Authorization = `Bearer ${API_KEY}`;
+  }
+
   const response = await fetch(API_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers,
     body: JSON.stringify({
       model: API_MODEL,
       messages

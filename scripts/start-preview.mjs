@@ -12,38 +12,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, '../dist');
 
-const runSmokeTest = async () => {
-  try {
-    const payload = {
-      model: ADOTX_MODEL,
-      messages: [
-        { role: 'user', content: '여름철 에어컨 적정 온도는? 한줄로 대답해.' }
-      ]
-    };
-    console.log('[smoke] sending ADOTX ping...');
-    const res = await fetch(ADOTX_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${ADOTX_API_KEY}`,
-      },
-      body: JSON.stringify(payload)
-    });
-    const text = await res.text();
-    console.log(`[smoke] status: ${res.status}`);
-    console.log('[smoke] body:', text.slice(0, 400));
-  } catch (err) {
-    console.error('[smoke] failed to contact ADOTX:', err);
-  }
-};
-
 if (!process.env.SKIP_BUILD) {
   console.log('[build] creating production bundle...');
   await build();
   console.log('[build] complete.');
 }
-
-await runSmokeTest();
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
@@ -62,21 +35,27 @@ app.options('/api/chat', (req, res) => {
 app.post('/api/chat', async (req, res) => {
   setCors(res);
   try {
-    console.log('[proxy] forwarding payload:', JSON.stringify(req.body, null, 2));
+    const payload = {
+      model: req.body?.model || ADOTX_MODEL,
+      messages: req.body?.messages || [],
+    };
+    console.log('[proxy] model:', payload.model, 'messages count:', payload.messages.length);
+    console.log('[proxy] first message role:', payload.messages[0]?.role, 'content length:', payload.messages[0]?.content?.length || 0);
+    
     const upstream = await fetch(ADOTX_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${ADOTX_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: req.body?.model || ADOTX_MODEL,
-        messages: req.body?.messages || [],
-      }),
+      body: JSON.stringify(payload),
     });
 
     const text = await upstream.text();
-    console.log('[proxy] upstream status:', upstream.status);
+    console.log('[proxy] upstream status:', upstream.status, 'response length:', text.length);
+    if (!upstream.ok) {
+      console.log('[proxy] error response:', text.slice(0, 200));
+    }
     res.status(upstream.status);
     res.setHeader('Content-Type', 'application/json');
     res.send(text);

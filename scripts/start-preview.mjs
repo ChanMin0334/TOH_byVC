@@ -3,14 +3,14 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const PORT = Number(process.env.PORT) || 4173;
-const ADOTX_API_URL = process.env.ADOTX_API_URL || process.env.VITE_ADOTX_API_URL || 'https://guest-api.sktax.chat/v1/chat/completions';
-const ADOTX_API_KEY = process.env.ADOTX_API_KEY || process.env.VITE_ADOTX_API_KEY || 'sktax-XyeKFrq67ZjS4EpsDlrHHXV8it';
-const ADOTX_MODEL = process.env.ADOTX_MODEL || process.env.VITE_ADOTX_MODEL || 'ax4';
+const PORT = Number(process.env.PORT) ?? 4173;
+const ADOTX_API_URL = process.env.ADOTX_API_URL ?? process.env.VITE_ADOTX_API_URL ?? 'https://guest-api.sktax.chat/v1/chat/completions';
+const ADOTX_API_KEY = process.env.ADOTX_API_KEY ?? process.env.VITE_ADOTX_API_KEY ?? 'sktax-XyeKFrq67ZjS4EpsDlrHHXV8it';
+const ADOTX_MODEL = process.env.ADOTX_MODEL ?? process.env.VITE_ADOTX_MODEL ?? 'ax4';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const distPath = path.resolve(__dirname, '../dist');
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
+const distPath = path.resolve(dirname, '../dist');
 
 if (!process.env.SKIP_BUILD) {
   console.log('[build] creating production bundle...');
@@ -22,7 +22,7 @@ const app = express();
 app.use(express.json({ limit: '1mb' }));
 
 const setCors = (res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', '*'); // 필요하다면 배포 환경에 맞게 도메인 제한 권장
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
 };
@@ -35,33 +35,27 @@ app.options('/api/chat', (req, res) => {
 app.post('/api/chat', async (req, res) => {
   setCors(res);
   try {
-    const payload = {
-      model: req.body?.model || ADOTX_MODEL,
-      messages: req.body?.messages || [],
-    };
-    console.log('[proxy] model:', payload.model, 'messages count:', payload.messages.length);
-    console.log('[proxy] first message role:', payload.messages[0]?.role, 'content length:', payload.messages[0]?.content?.length || 0);
-    
+    console.log('[proxy] forwarding payload:', JSON.stringify(req.body, null, 2));
     const upstream = await fetch(ADOTX_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${ADOTX_API_KEY}`,
+        Authorization: `Bearer ${ADOTX_API_KEY}`, // 백틱 적용
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        model: req.body?.model ?? ADOTX_MODEL, // null 병합 연산자 적용
+        messages: req.body?.messages ?? [],
+      }),
     });
 
     const text = await upstream.text();
-    console.log('[proxy] upstream status:', upstream.status, 'response length:', text.length);
-    if (!upstream.ok) {
-      console.log('[proxy] error response:', text.slice(0, 200));
-    }
+    console.log('[proxy] upstream status:', upstream.status);
     res.status(upstream.status);
     res.setHeader('Content-Type', 'application/json');
     res.send(text);
   } catch (error) {
     console.error('[proxy] ADOTX call failed', error);
-    res.status(500).json({ error: 'ADOTX proxy failed', message: error?.message || String(error) });
+    res.status(500).json({ error: 'ADOTX proxy failed', message: error?.message ?? String(error) });
   }
 });
 

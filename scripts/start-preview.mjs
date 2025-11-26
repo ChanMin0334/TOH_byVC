@@ -12,11 +12,38 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, '../dist');
 
+const runSmokeTest = async () => {
+  try {
+    const payload = {
+      model: ADOTX_MODEL,
+      messages: [
+        { role: 'user', content: '여름철 에어컨 적정 온도는? 한줄로 대답해.' }
+      ]
+    };
+    console.log('[smoke] sending ADOTX ping...');
+    const res = await fetch(ADOTX_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${ADOTX_API_KEY}`,
+      },
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    console.log(`[smoke] status: ${res.status}`);
+    console.log('[smoke] body:', text.slice(0, 400));
+  } catch (err) {
+    console.error('[smoke] failed to contact ADOTX:', err);
+  }
+};
+
 if (!process.env.SKIP_BUILD) {
   console.log('[build] creating production bundle...');
   await build();
   console.log('[build] complete.');
 }
+
+await runSmokeTest();
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));

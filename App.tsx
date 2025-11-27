@@ -49,6 +49,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSetFirebaseUid }) => {
     }
   };
 
+  const handleGuestLogin = () => {
+    const guestUser: User = {
+      id: generateId(),
+      username: `게스트_${Date.now().toString().slice(-4)}`,
+      createdAt: Date.now(),
+    };
+    Storage.saveOrUpdateUser(guestUser);
+    Storage.setCurrentUser(guestUser);
+    onLogin();
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#0f172a] p-6 text-center">
       <div className="mb-6 relative">
@@ -70,6 +81,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSetFirebaseUid }) => {
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4" />
           Google 계정으로 시작하기
         </Button>
+        
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-px bg-slate-700"></div>
+          <span className="text-xs text-slate-500 uppercase">또는</span>
+          <div className="flex-1 h-px bg-slate-700"></div>
+        </div>
+        
+        <Button
+          className="w-full text-sm"
+          variant="ghost"
+          onClick={handleGuestLogin}
+        >
+          게스트로 시작하기
+        </Button>
+        
         {loginError && (
           <p className="text-xs text-rose-400 text-center">{loginError}</p>
         )}

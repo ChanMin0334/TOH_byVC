@@ -11,7 +11,7 @@
       {
         "source": "/api/**",
         "run": {
-          "serviceId": "toh-re-api",
+          "serviceId": "toh-byvc",
           "region": "asia-northeast3"
         }
       },

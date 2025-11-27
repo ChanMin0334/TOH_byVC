@@ -1,16 +1,14 @@
 import { AICharacterResponse, AIBattleResponse, Character, WorldType } from '../types';
 
 /**
- * ADOTX (https://guest-api.sktax.chat) integration details
- * - Set VITE_ADOTX_API_KEY in your .env.local before running Vite.
- * - Requests are sent directly from the browser; to avoid leaking secrets in production,
- *   proxy the call through your own backend instead.
+ * Seoul Cloud Run 서비스를 통한 ADOTX API 호출
+ * 모든 요청은 /api/chat 엔드포인트를 통해 프록시됩니다.
  */
-const API_URL = import.meta.env.VITE_ADOTX_API_URL ?? '/api/chat';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_KEY = import.meta.env.VITE_ADOTX_API_KEY ?? 'sktax-XyeKFrq67ZjS4EpsDlrHHXV8it';
 const API_MODEL = import.meta.env.VITE_ADOTX_MODEL ?? 'ax4';
 
-// Proxy를 사용하므로 항상 실시간 호출을 사용한다.
+// 항상 실시간 호출을 사용한다.
 const USE_MOCK_AI = false;
 
 type ChatMessage = {
@@ -18,29 +16,33 @@ type ChatMessage = {
   content: string;
 };
 
-const callAdotxChat = async (messages: ChatMessage[]): Promise<string> => {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
-  };
-  if (API_KEY) {
-    headers.Authorization = `Bearer ${API_KEY}`;
-  }
+type ChatRequest = {
+  model: string;
+  messages: ChatMessage[];
+};
 
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model: API_MODEL,
-      messages
-    })
+async function generateCharacter(payload: ChatRequest) {
+  const res = await fetch(`${API_BASE_URL}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`ADOTX API 오류: ${response.status} ${body}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`API error: ${res.status} ${body}`);
   }
 
-  const data = await response.json();
+  return res.json();
+}
+
+const callAdotxChat = async (messages: ChatMessage[]): Promise<string> => {
+  const payload: ChatRequest = {
+    model: API_MODEL,
+    messages
+  };
+
+  const data = await generateCharacter(payload);
   const content: string | undefined = data?.choices?.[0]?.message?.content;
 
   if (!content) {

@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "toh-re",
+    "site": "toh-byvc-site",
     "public": "dist",
     "ignore": [
       "firebase.json",

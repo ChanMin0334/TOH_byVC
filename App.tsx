@@ -5,6 +5,7 @@ import * as Storage from './services/storageService';
 import * as GameService from './services/gameService';
 import * as AIService from './services/aiService';
 import * as AuthService from './services/authService';
+import { firestoreService } from './services/firestoreService';
 import { generateId } from './utils/id';
 import { Button, Card, Input, TextArea, Container, BottomNav, Badge, Tabs, Avatar, ProgressBar, ScreenLayout } from './components/UIComponents';
 import { Swords, Trophy, Zap, ChevronLeft, Plus, Crown, Clock, Share2, Trash2, Copy, Check } from 'lucide-react';
@@ -142,11 +143,36 @@ const CreatePage: React.FC<{ user: User; onFinish: () => void }> = ({ user, onFi
     }
   };
 
-  const handleSave = () => {
-    if (generatedChar) {
+  const handleSave = async () => {
+    if (generatedChar && firebaseUid) {
+      try {
+        // Firestore에 저장 (자동 ID 생성)
+        const characterId = await firestoreService.createCharacter({
+          ...generatedChar,
+          createdAt: Date.now()
+        } as Omit<Character, 'id'>, firebaseUid);
+        
+        // 로컬 저장도 유지 (ID 포함)
+        const newChar: Character = {
+          ...generatedChar,
+          id: characterId,
+          userId: firebaseUid,
+          createdAt: Date.now()
+        } as Character;
+        Storage.saveCharacter(newChar);
+        
+        console.log('캐릭터 저장 완료:', characterId);
+        onFinish();
+      } catch (error) {
+        console.error('캐릭터 저장 실패:', error);
+        alert('캐릭터 저장에 실패했습니다. 다시 시도해주세요.');
+      }
+    } else {
+      // Firebase UID가 없으면 로컬만 저장
       const newChar: Character = {
         ...generatedChar,
         id: generateId(),
+        userId: firebaseUid || '',
         createdAt: Date.now()
       } as Character;
       Storage.saveCharacter(newChar);

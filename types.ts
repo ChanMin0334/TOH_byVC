@@ -14,6 +14,7 @@ export interface Skill {
 
 export interface Character {
   id: string;
+  userId: string; // Firebase UID
   ownerId: string;
   ownerName: string;
   name: string;

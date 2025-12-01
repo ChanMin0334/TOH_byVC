@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 캐릭터 컬렉션 규칙
+    match /characters/{characterId} {
+      // 사용자는 자신의 캐릭터만 읽기/쓰기 가능
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      
+      // 캐릭터 생성시에도 자신의 UID와 일치해야 함
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // 공개적으로 읽을 수 있는 캐릭터 (배틀용)
+    match /characters/{characterId} {
+      // 모든 사용자가 캐릭터를 읽을 수 있음 (배틀 시스템용)
+      allow read: if request.auth != null;
+    }
+  }
+}
